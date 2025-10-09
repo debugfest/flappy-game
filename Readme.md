@@ -28,7 +28,7 @@ A simple, fast Flappy‑style arcade game built with JavaScript and HTML5 Canvas
 ## 🚀 Quick Start
 
 ```bash
-git clone <YOUR_REPO_URL>
+git clone https://github.com/debugfest/flappy-game.git
 cd flappy-game
 
 # install deps
