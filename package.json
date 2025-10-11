@@ -9,6 +9,19 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "vite": "^5.4.2"
-  }
+    "vite": "^5.4.20"
+  },
+  "description": "A simple, fast Flappy‑style arcade game built with JavaScript and HTML5 Canvas. Tap or press to flap, dodge obstacles, and chase a new high score.",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohit-22/flappy-game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mohit-22/flappy-game/issues"
+  },
+  "homepage": "https://github.com/mohit-22/flappy-game#readme"
 }
