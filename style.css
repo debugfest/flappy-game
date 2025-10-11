@@ -51,6 +51,8 @@ body {
   color: white;
   z-index: 10;
   transition: opacity 0.3s ease;
+  pointer-events: auto; /* screen ke upar clicks allow */
+  z-index: 10;
 }
 
 .screen.hidden {
@@ -102,4 +104,28 @@ body {
   text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
   z-index: 5;
   pointer-events: none;
+  z-index: 5;
+
+}
+
+
+#theme-toggle {
+  position: absolute;         /* canvas ke relative position ke respect me */
+  bottom: 20px;               /* canvas ke bottom se 20px upar */
+  left: 50%;                  /* horizontal center */
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  font-size: 16px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 15;            /* canvas aur screens ke upar dikhne ke liye */
+  pointer-events: auto;
+}
+
+#theme-toggle:hover {
+  background: #ff5252;
+  transform: translateX(-50%) scale(1.05);
 }

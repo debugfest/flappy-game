@@ -1,4 +1,5 @@
 import './style.css';
+import { getTheme, setTheme, updateTheme, drawBackground, createRaindrops, drawRaindrops } from './themes.js';
 
 // Canvas setup
 const canvas = document.getElementById('gameCanvas');
@@ -12,6 +13,21 @@ const gameOverScreen = document.getElementById('game-over-screen');
 const scoreDisplay = document.getElementById('score');
 const finalScoreDisplay = document.getElementById('final-score');
 const restartBtn = document.getElementById('restart-btn');
+
+const themeBtn = document.getElementById('theme-toggle');
+if(themeBtn){
+  themeBtn.addEventListener('click', () => {
+    // manual switch
+    const current = getTheme();
+    const next = current === 'day' ? 'night' : current === 'night' ? 'rain' : 'day';
+    setTheme(next);
+
+    // redraw background immediately
+    drawBackground();
+    if(next === 'rain') drawRaindrops();
+  });
+}
+
 
 // Game state
 let gameState = 'start'; // 'start', 'playing', 'gameOver'
@@ -139,6 +155,7 @@ function updatePipes() {
       pipe.scored = true;
       score++;
       scoreDisplay.textContent = score;
+      updateTheme(score); 
     }
   });
 
@@ -185,6 +202,9 @@ function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (gameState === 'playing') {
+    drawBackground();
+    if(getTheme() === 'rain') drawRaindrops();
+
     // Update game objects
     bird.update();
     updatePipes();
@@ -213,6 +233,8 @@ function startGame() {
 
   startScreen.classList.add('hidden');
   gameOverScreen.classList.add('hidden');
+  createRaindrops(); // prepares particles for rain
+  //  if(theme === 'rain') createRaindrops();
 
   gameLoop();
 }
