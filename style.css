@@ -129,3 +129,29 @@ body {
   background: #ff5252;
   transform: translateX(-50%) scale(1.05);
 }
+
+
+#difficulty-buttons {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+}
+
+.difficulty-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #ff6b6b;
+  color: white;
+  cursor: pointer;
+}
+
+.difficulty-btn.selected {
+  background: #ffd700;
+  color: #000;
+}
+

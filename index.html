@@ -9,18 +9,30 @@
   <body>
     <div id="game-container">
       <canvas id="gameCanvas"></canvas>
+
+      <!-- Start Screen -->
       <div id="start-screen" class="screen">
         <h1>Flappy Bird</h1>
+        <p>Select Difficulty:</p>
+        <div id="difficulty-buttons">
+          <button class="difficulty-btn" data-difficulty="easy">Easy</button>
+          <button class="difficulty-btn" data-difficulty="normal">Normal</button>
+          <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+        </div>
         <p>Press SPACEBAR to start</p>
       </div>
+
+      <!-- Game Over Screen -->
       <div id="game-over-screen" class="screen hidden">
         <h1>Game Over!</h1>
         <p id="final-score">Score: 0</p>
         <button id="restart-btn">Play Again</button>
       </div>
+
       <div id="score">0</div>
       <button id="theme-toggle">Switch Theme</button>
     </div>
+
     <script type="module" src="/main.js"></script>
   </body>
 </html>
