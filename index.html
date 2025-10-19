@@ -1,37 +1,72 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flappy Bird Clone</title>
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div id="game-container">
       <canvas id="gameCanvas"></canvas>
 
-      <!-- Start Screen -->
+      <!--  Start Screen -->
       <div id="start-screen" class="screen">
-        <h1>Flappy Bird</h1>
-        <p>Select Difficulty:</p>
-        <div id="difficulty-buttons">
-          <button class="difficulty-btn" data-difficulty="easy">Easy</button>
-          <button class="difficulty-btn" data-difficulty="normal">Normal</button>
-          <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+        <h1 class="game-title">🐤 Flappy Bird</h1>
+
+        <div class="menu-section">
+          <p class="subtitle">Select Difficulty:</p>
+          <div id="difficulty-buttons" class="difficulty-container">
+            <button class="difficulty-btn easy" data-difficulty="easy">Easy</button>
+            <button class="difficulty-btn normal" data-difficulty="normal">Normal</button>
+            <button class="difficulty-btn hard" data-difficulty="hard">Hard</button>
+          </div>
+          <p class="hint">Press <strong>SPACEBAR</strong> to start</p>
         </div>
-        <p>Press SPACEBAR to start</p>
+      </div>
+    <!--  Character Selection Overlay -->
+      <div id="character-selection" class="overlay hidden">
+        <h2>Select Your Bird</h2>
+        <div id="skins-list" class="skins-list">
+          <!-- JS will populate skin cards -->
+        </div>
+
+        <div class="selection-footer">
+          <div id="coin-counter" class="coin-display">
+            🪙 Coins: <span id="coin-count">0</span>
+          </div>
+          <button id="confirm-skin" class="btn confirm-btn">✅ Confirm & Start</button>
+        </div>
       </div>
 
-      <!-- Game Over Screen -->
+      <!--  Game Over Screen -->
       <div id="game-over-screen" class="screen hidden">
-        <h1>Game Over!</h1>
+        <h1 class="game-over-title">💀 Game Over!</h1>
         <p id="final-score">Score: 0</p>
-        <button id="restart-btn">Play Again</button>
+        <button id="restart-btn" class="btn restart-btn">Play Again</button>
+      </div>
+     <!-- HUD (Score + Coins) -->
+      <div id="hud" class="hud hidden">
+        <div id="score" class="score-display">0</div>
+        <div id="coin-hud" class="coin-display">🪙 <span id="coin-hud-count">0</span></div>
+        <div id="adaptive-display"></div>
       </div>
 
-      <div id="score">0</div>
-      <button id="theme-toggle">Switch Theme</button>
+      <!-- Theme Toggle -->
+      <button id="theme-toggle" class="theme-toggle">🌗 Switch Theme</button>
     </div>
+
+    <noscript>
+      <p style="text-align: center; font-family: sans-serif;">
+        Please enable JavaScript to play this game.
+      </p>
+    </noscript>
 
     <script type="module" src="/main.js"></script>
   </body>
