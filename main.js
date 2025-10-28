@@ -1,6 +1,7 @@
 import './style.css';
 import { getTheme, setTheme, updateTheme, drawBackground, createRaindrops, drawRaindrops } from './themes.js';
 import { getCurrentGap, getCurrentSpeed, onPipePassed, initDifficulty } from './difficulty.js';
+import { getDailyChallenges, updateChallengeProgress, completeChallenge, getStreakBonus, getTotalCoinsEarned, getCompletedChallenges, CHALLENGE_TYPES } from './daily-challenges.js';
 
 // Canvas setup
 const canvas = document.getElementById('gameCanvas');
@@ -22,6 +23,14 @@ const skinsListEl = document.getElementById('skins-list');
 const confirmSkinBtn = document.getElementById('confirm-skin');
 const coinCountEl = document.getElementById('coin-count');
 const coinHudCount = document.getElementById('coin-hud-count');
+
+// Daily Challenges UI elements
+const challengesBtn = document.getElementById('challenges-btn');
+const challengesModal = document.getElementById('challenges-modal');
+const closeChallengesBtn = document.getElementById('close-challenges');
+const challengesListEl = document.getElementById('challenges-list');
+const streakCountEl = document.getElementById('streak-count');
+const totalCoinsEarnedEl = document.getElementById('total-coins-earned');
 if (themeBtn) {
   themeBtn.addEventListener('click', () => {
     const current = getTheme();
@@ -37,6 +46,11 @@ let gameState = 'start'; // 'start', 'characterSelect', 'playing', 'gameOver'
 let score = 0;
 let coins = 0;
 let animationId = null;
+
+// Challenge tracking variables
+let gameStartTime = 0;
+let jumpCount = 0;
+let perfectRun = true; // Track if player hasn't hit any pipes
 
 // Difficulty settings 
 let pipeGap = getCurrentGap ? getCurrentGap() : 150;
@@ -197,6 +211,8 @@ const bird = {
 
   jump() {
     this.velocity = this.jumpStrength;
+    jumpCount++;
+    updateChallengeProgress(CHALLENGE_TYPES.JUMP_COUNT, jumpCount);
   },
 
   reset() {
@@ -250,6 +266,7 @@ function updatePipes() {
       score++;
       scoreDisplay.textContent = score;
       updateTheme(score);
+      updateChallengeProgress(CHALLENGE_TYPES.SCORE_POINTS, score);
 
       // inform difficulty adaptive module
       if (typeof onPipePassed === 'function') onPipePassed();
@@ -275,6 +292,7 @@ function checkCollision() {
   for (const pipe of pipes) {
     if (bird.x + bird.width > pipe.x && bird.x < pipe.x + pipeWidth) {
       if (bird.y < pipe.topHeight || bird.y + bird.height > pipe.bottomY) {
+        perfectRun = false; // Mark perfect run as failed
         endGame();
         return;
       }
@@ -304,6 +322,7 @@ function updateCoins() {
       coins++;
       coinCountEl.textContent = coins;
       coinHudCount.textContent = coins;
+      updateChallengeProgress(CHALLENGE_TYPES.COLLECT_COINS, coins);
     }
   });
   while (coinsArr.length && (coinsArr[0].x + coinRadius < 0 || coinsArr[0].collected)) {
@@ -345,6 +364,10 @@ function gameLoop() {
     drawPipes();
     drawCoins();
     bird.draw();
+
+    // Update survival time challenge
+    const survivalTime = Math.floor((Date.now() - gameStartTime) / 1000);
+    updateChallengeProgress(CHALLENGE_TYPES.SURVIVE_TIME, survivalTime);
 
     animationId = requestAnimationFrame(gameLoop);
   }
@@ -443,6 +466,11 @@ function startGame() {
   gameOverScreen.classList.add('hidden');
   characterSelection.classList.add('hidden');
 
+  // Reset challenge tracking variables
+  gameStartTime = Date.now();
+  jumpCount = 0;
+  perfectRun = true;
+
   // Hide difficulty buttons until needed
   document.getElementById('difficulty-buttons').style.display = 'flex';
 
@@ -459,6 +487,11 @@ function endGame() {
 
   // Show difficulty buttons even on Game Over screen
   document.getElementById('difficulty-buttons').style.display = 'flex';
+
+  // Check perfect run challenge
+  if (perfectRun && score > 0) {
+    updateChallengeProgress(CHALLENGE_TYPES.PERFECT_RUN, 1);
+  }
 
   // check for skin unlocks based on final score
   SKINS.forEach(skin => {
@@ -551,3 +584,125 @@ setInterval(() => {
   });
   if (changed) saveUnlocked();
 }, 2000);
+
+// ---------------------- DAILY CHALLENGES ----------------------
+function renderChallenges() {
+  const challenges = getDailyChallenges();
+  const completedChallenges = getCompletedChallenges();
+  const allChallenges = [...challenges, ...completedChallenges];
+  
+  challengesListEl.innerHTML = '';
+  
+  if (allChallenges.length === 0) {
+    challengesListEl.innerHTML = '<div class="no-challenges">No challenges available today. Check back tomorrow!</div>';
+    return;
+  }
+  
+  allChallenges.forEach(challenge => {
+    const card = document.createElement('div');
+    card.className = `challenge-card ${challenge.completed ? 'completed' : ''}`;
+    
+    const progressPercentage = challenge.getProgressPercentage();
+    const streakBonus = getStreakBonus();
+    const totalReward = challenge.reward + (streakBonus * challenge.difficulty.streakBonus);
+    
+    card.innerHTML = `
+      <div class="challenge-header">
+        <div class="challenge-icon">${challenge.template.icon}</div>
+        <h3 class="challenge-title">${challenge.template.name}</h3>
+      </div>
+      <p class="challenge-description">${challenge.getDescription()}</p>
+      <div class="challenge-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${progressPercentage}%"></div>
+        </div>
+        <div class="progress-text">${challenge.progress}/${challenge.target}</div>
+      </div>
+      <div class="challenge-reward">
+        <div class="reward-coins">🪙 ${totalReward} coins</div>
+        ${streakBonus > 0 ? `<div class="streak-bonus">+${streakBonus * challenge.difficulty.streakBonus} streak bonus</div>` : ''}
+        ${!challenge.completed ? `<button class="claim-btn" disabled>In Progress</button>` : `<button class="claim-btn" onclick="claimChallenge('${challenge.id}')">Claim Reward</button>`}
+      </div>
+    `;
+    
+    challengesListEl.appendChild(card);
+  });
+}
+
+function claimChallenge(challengeId) {
+  const reward = completeChallenge(challengeId);
+  if (reward > 0) {
+    coins += reward;
+    coinCountEl.textContent = coins;
+    coinHudCount.textContent = coins;
+    
+    // Show reward notification
+    showNotification(`+${reward} coins earned!`, 'success');
+    
+    // Re-render challenges
+    renderChallenges();
+    updateChallengesStats();
+  }
+}
+
+function updateChallengesStats() {
+  streakCountEl.textContent = getStreakBonus();
+  totalCoinsEarnedEl.textContent = getTotalCoinsEarned();
+}
+
+function showNotification(message, type = 'info') {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : '#3498db'};
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    z-index: 10001;
+    animation: slideInRight 0.3s ease;
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    notification.style.animation = 'slideOutRight 0.3s ease';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+// Event listeners for daily challenges
+if (challengesBtn) {
+  challengesBtn.addEventListener('click', () => {
+    renderChallenges();
+    updateChallengesStats();
+    challengesModal.classList.remove('hidden');
+  });
+}
+
+if (closeChallengesBtn) {
+  closeChallengesBtn.addEventListener('click', () => {
+    challengesModal.classList.add('hidden');
+  });
+}
+
+// Close modal when clicking outside
+if (challengesModal) {
+  challengesModal.addEventListener('click', (e) => {
+    if (e.target === challengesModal) {
+      challengesModal.classList.add('hidden');
+    }
+  });
+}
+
+// Make claimChallenge globally available
+window.claimChallenge = claimChallenge;
+
+// Initialize challenges stats on page load
+updateChallengesStats();
