@@ -60,6 +60,32 @@
 
       <!-- Theme Toggle -->
       <button id="theme-toggle" class="theme-toggle">🌗 Switch Theme</button>
+
+      <!-- Daily Challenges Button -->
+      <button id="challenges-btn" class="challenges-btn">📅 Daily Challenges</button>
+
+      <!-- Daily Challenges Modal -->
+      <div id="challenges-modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>📅 Daily Challenges</h2>
+            <button id="close-challenges" class="close-btn">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="streak-info">
+              <div class="streak-display">
+                🔥 Streak: <span id="streak-count">0</span> days
+              </div>
+              <div class="total-coins">
+                🪙 Total Earned: <span id="total-coins-earned">0</span> coins
+              </div>
+            </div>
+            <div id="challenges-list" class="challenges-list">
+              <!-- Challenges will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <noscript>
